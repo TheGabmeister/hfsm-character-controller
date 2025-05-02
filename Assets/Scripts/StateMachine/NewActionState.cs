@@ -1,8 +1,8 @@
 using UnityHFSM;
 
-public abstract class OnFixedLogicActionState : ActionState
+public abstract class NewActionState : ActionState
 {
-    protected OnFixedLogicActionState(bool needsExitTime, bool isGhostState = false)
+    protected NewActionState(bool needsExitTime, bool isGhostState = false)
         : base(needsExitTime, isGhostState)
     {
         AddAction("OnFixedLogic", OnFixedLogic);
