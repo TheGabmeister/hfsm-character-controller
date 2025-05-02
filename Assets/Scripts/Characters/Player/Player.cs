@@ -45,8 +45,6 @@ namespace GenshinImpactMovementSystem
             MainCameraTransform = Camera.main.transform;
 
             movementStateMachine = new PlayerMovementStateMachine(this);
-
-            fsm = new UnityHFSM.StateMachine();
         }
 
         private void Start()
