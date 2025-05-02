@@ -1,47 +1,45 @@
 using UnityEngine.InputSystem;
 
-namespace GenshinImpactMovementSystem
+
+public class PlayerWalkingState : PlayerMovingState
 {
-    public class PlayerWalkingState : PlayerMovingState
+    public PlayerWalkingState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
     {
-        public PlayerWalkingState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
-        {
-        }
+    }
 
-        public override void OnEnter()
-        {
-            stateMachine.ReusableData.MovementSpeedModifier = groundedData.WalkData.SpeedModifier;
+    public override void OnEnter()
+    {
+        stateMachine.ReusableData.MovementSpeedModifier = groundedData.WalkData.SpeedModifier;
 
-            stateMachine.ReusableData.BackwardsCameraRecenteringData = groundedData.WalkData.BackwardsCameraRecenteringData;
+        stateMachine.ReusableData.BackwardsCameraRecenteringData = groundedData.WalkData.BackwardsCameraRecenteringData;
 
-            base.OnEnter();
+        base.OnEnter();
 
-            StartAnimation(stateMachine.Player.AnimationData.WalkParameterHash);
+        StartAnimation(stateMachine.Player.AnimationData.WalkParameterHash);
 
-            stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.WeakForce;
-        }
+        stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.WeakForce;
+    }
 
-        public override void OnExit()
-        {
-            base.OnExit();
+    public override void OnExit()
+    {
+        base.OnExit();
 
-            StopAnimation(stateMachine.Player.AnimationData.WalkParameterHash);
+        StopAnimation(stateMachine.Player.AnimationData.WalkParameterHash);
 
-            SetBaseCameraRecenteringData();
-        }
+        SetBaseCameraRecenteringData();
+    }
 
-        protected override void OnWalkToggleStarted(InputAction.CallbackContext context)
-        {
-            base.OnWalkToggleStarted(context);
+    protected override void OnWalkToggleStarted(InputAction.CallbackContext context)
+    {
+        base.OnWalkToggleStarted(context);
 
-            stateMachine.RequestStateChange("RunningState");
-        }
+        stateMachine.RequestStateChange("RunningState");
+    }
 
-        protected override void OnMovementCanceled(InputAction.CallbackContext context)
-        {
-            stateMachine.RequestStateChange("LightStoppingState");
+    protected override void OnMovementCanceled(InputAction.CallbackContext context)
+    {
+        stateMachine.RequestStateChange("LightStoppingState");
 
-            base.OnMovementCanceled(context);
-        }
+        base.OnMovementCanceled(context);
     }
 }

@@ -1,18 +1,16 @@
-namespace GenshinImpactMovementSystem
+
+public class PlayerLightStoppingState : PlayerStoppingState
 {
-    public class PlayerLightStoppingState : PlayerStoppingState
+    public PlayerLightStoppingState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
     {
-        public PlayerLightStoppingState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
-        {
-        }
+    }
 
-        public override void OnEnter()
-        {
-            base.OnEnter();
+    public override void OnEnter()
+    {
+        base.OnEnter();
 
-            stateMachine.ReusableData.MovementDecelerationForce = groundedData.StopData.LightDecelerationForce;
+        stateMachine.ReusableData.MovementDecelerationForce = groundedData.StopData.LightDecelerationForce;
 
-            stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.WeakForce;
-        }
+        stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.WeakForce;
     }
 }

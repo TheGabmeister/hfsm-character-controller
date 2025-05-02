@@ -1,185 +1,182 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace GenshinImpactMovementSystem
+public class PlayerGroundedState : PlayerMovementState
 {
-    public class PlayerGroundedState : PlayerMovementState
+    public PlayerGroundedState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
     {
-        public PlayerGroundedState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
+    }
+
+    public override void OnEnter()
+    {
+        base.OnEnter();
+
+        StartAnimation(stateMachine.Player.AnimationData.GroundedParameterHash);
+
+        UpdateShouldSprintState();
+
+        UpdateCameraRecenteringState(stateMachine.ReusableData.MovementInput);
+    }
+
+    public override void OnExit()
+    {
+        base.OnExit();
+
+        StopAnimation(stateMachine.Player.AnimationData.GroundedParameterHash);
+    }
+
+    public override void OnPhysicsLogic()
+    {
+        base.OnPhysicsLogic();
+
+        Float();
+    }
+
+    private void UpdateShouldSprintState()
+    {
+        if (!stateMachine.ReusableData.ShouldSprint)
         {
+            return;
         }
 
-        public override void OnEnter()
+        if (stateMachine.ReusableData.MovementInput != Vector2.zero)
         {
-            base.OnEnter();
+            return;
+        }
 
-            StartAnimation(stateMachine.Player.AnimationData.GroundedParameterHash);
+        stateMachine.ReusableData.ShouldSprint = false;
+    }
 
-            UpdateShouldSprintState();
+    private void Float()
+    {
+        Vector3 capsuleColliderCenterInWorldSpace = stateMachine.Player.ResizableCapsuleCollider.CapsuleColliderData.Collider.bounds.center;
+
+        Ray downwardsRayFromCapsuleCenter = new Ray(capsuleColliderCenterInWorldSpace, Vector3.down);
+
+        if (Physics.Raycast(downwardsRayFromCapsuleCenter, out RaycastHit hit, stateMachine.Player.ResizableCapsuleCollider.SlopeData.FloatRayDistance, stateMachine.Player.LayerData.GroundLayer, QueryTriggerInteraction.Ignore))
+        {
+            float groundAngle = Vector3.Angle(hit.normal, -downwardsRayFromCapsuleCenter.direction);
+
+            float slopeSpeedModifier = SetSlopeSpeedModifierOnAngle(groundAngle);
+
+            if (slopeSpeedModifier == 0f)
+            {
+                return;
+            }
+
+            float distanceToFloatingPoint = stateMachine.Player.ResizableCapsuleCollider.CapsuleColliderData.ColliderCenterInLocalSpace.y * stateMachine.Player.transform.localScale.y - hit.distance;
+
+            if (distanceToFloatingPoint == 0f)
+            {
+                return;
+            }
+
+            float amountToLift = distanceToFloatingPoint * stateMachine.Player.ResizableCapsuleCollider.SlopeData.StepReachForce - GetPlayerVerticalVelocity().y;
+
+            Vector3 liftForce = new Vector3(0f, amountToLift, 0f);
+
+            stateMachine.Player.Rigidbody.AddForce(liftForce, ForceMode.VelocityChange);
+        }
+    }
+
+    private float SetSlopeSpeedModifierOnAngle(float angle)
+    {
+        float slopeSpeedModifier = groundedData.SlopeSpeedAngles.Evaluate(angle);
+
+        if (stateMachine.ReusableData.MovementOnSlopesSpeedModifier != slopeSpeedModifier)
+        {
+            stateMachine.ReusableData.MovementOnSlopesSpeedModifier = slopeSpeedModifier;
 
             UpdateCameraRecenteringState(stateMachine.ReusableData.MovementInput);
         }
 
-        public override void OnExit()
-        {
-            base.OnExit();
+        return slopeSpeedModifier;
+    }
 
-            StopAnimation(stateMachine.Player.AnimationData.GroundedParameterHash);
+    protected override void AddInputActionsCallbacks()
+    {
+        base.AddInputActionsCallbacks();
+
+        stateMachine.Player.Input.PlayerActions.Dash.started += OnDashStarted;
+
+        stateMachine.Player.Input.PlayerActions.Jump.started += OnJumpStarted;
+    }
+
+    protected override void RemoveInputActionsCallbacks()
+    {
+        base.RemoveInputActionsCallbacks();
+
+        stateMachine.Player.Input.PlayerActions.Dash.started -= OnDashStarted;
+
+        stateMachine.Player.Input.PlayerActions.Jump.started -= OnJumpStarted;
+    }
+
+    protected virtual void OnDashStarted(InputAction.CallbackContext context)
+    {
+        stateMachine.RequestStateChange("DashingState");
+    }
+
+    protected virtual void OnJumpStarted(InputAction.CallbackContext context)
+    {
+        stateMachine.RequestStateChange("JumpingState");
+    }
+
+    protected virtual void OnMove()
+    {
+        if (stateMachine.ReusableData.ShouldSprint)
+        {
+            stateMachine.RequestStateChange("SprintingState");
+
+            return;
         }
 
-        public override void OnPhysicsLogic()
+        if (stateMachine.ReusableData.ShouldWalk)
         {
-            base.OnPhysicsLogic();
+            stateMachine.RequestStateChange("WalkingState");
 
-            Float();
+            return;
         }
 
-        private void UpdateShouldSprintState()
+        stateMachine.RequestStateChange("RunningState");
+    }
+
+    protected override void OnContactWithGroundExited(Collider collider)
+    {
+        if (IsThereGroundUnderneath())
         {
-            if (!stateMachine.ReusableData.ShouldSprint)
-            {
-                return;
-            }
-
-            if (stateMachine.ReusableData.MovementInput != Vector2.zero)
-            {
-                return;
-            }
-
-            stateMachine.ReusableData.ShouldSprint = false;
+            return;
         }
 
-        private void Float()
+        Vector3 capsuleColliderCenterInWorldSpace = stateMachine.Player.ResizableCapsuleCollider.CapsuleColliderData.Collider.bounds.center;
+
+        Ray downwardsRayFromCapsuleBottom = new Ray(capsuleColliderCenterInWorldSpace - stateMachine.Player.ResizableCapsuleCollider.CapsuleColliderData.ColliderVerticalExtents, Vector3.down);
+
+        if (!Physics.Raycast(downwardsRayFromCapsuleBottom, out _, groundedData.GroundToFallRayDistance, stateMachine.Player.LayerData.GroundLayer, QueryTriggerInteraction.Ignore))
         {
-            Vector3 capsuleColliderCenterInWorldSpace = stateMachine.Player.ResizableCapsuleCollider.CapsuleColliderData.Collider.bounds.center;
-
-            Ray downwardsRayFromCapsuleCenter = new Ray(capsuleColliderCenterInWorldSpace, Vector3.down);
-
-            if (Physics.Raycast(downwardsRayFromCapsuleCenter, out RaycastHit hit, stateMachine.Player.ResizableCapsuleCollider.SlopeData.FloatRayDistance, stateMachine.Player.LayerData.GroundLayer, QueryTriggerInteraction.Ignore))
-            {
-                float groundAngle = Vector3.Angle(hit.normal, -downwardsRayFromCapsuleCenter.direction);
-
-                float slopeSpeedModifier = SetSlopeSpeedModifierOnAngle(groundAngle);
-
-                if (slopeSpeedModifier == 0f)
-                {
-                    return;
-                }
-
-                float distanceToFloatingPoint = stateMachine.Player.ResizableCapsuleCollider.CapsuleColliderData.ColliderCenterInLocalSpace.y * stateMachine.Player.transform.localScale.y - hit.distance;
-
-                if (distanceToFloatingPoint == 0f)
-                {
-                    return;
-                }
-
-                float amountToLift = distanceToFloatingPoint * stateMachine.Player.ResizableCapsuleCollider.SlopeData.StepReachForce - GetPlayerVerticalVelocity().y;
-
-                Vector3 liftForce = new Vector3(0f, amountToLift, 0f);
-
-                stateMachine.Player.Rigidbody.AddForce(liftForce, ForceMode.VelocityChange);
-            }
+            OnFall();
         }
+    }
 
-        private float SetSlopeSpeedModifierOnAngle(float angle)
-        {
-            float slopeSpeedModifier = groundedData.SlopeSpeedAngles.Evaluate(angle);
+    private bool IsThereGroundUnderneath()
+    {
+        PlayerTriggerColliderData triggerColliderData = stateMachine.Player.ResizableCapsuleCollider.TriggerColliderData;
 
-            if (stateMachine.ReusableData.MovementOnSlopesSpeedModifier != slopeSpeedModifier)
-            {
-                stateMachine.ReusableData.MovementOnSlopesSpeedModifier = slopeSpeedModifier;
+        Vector3 groundColliderCenterInWorldSpace = triggerColliderData.GroundCheckCollider.bounds.center;
 
-                UpdateCameraRecenteringState(stateMachine.ReusableData.MovementInput);
-            }
+        Collider[] overlappedGroundColliders = Physics.OverlapBox(groundColliderCenterInWorldSpace, triggerColliderData.GroundCheckColliderVerticalExtents, triggerColliderData.GroundCheckCollider.transform.rotation, stateMachine.Player.LayerData.GroundLayer, QueryTriggerInteraction.Ignore);
 
-            return slopeSpeedModifier;
-        }
+        return overlappedGroundColliders.Length > 0;
+    }
 
-        protected override void AddInputActionsCallbacks()
-        {
-            base.AddInputActionsCallbacks();
+    protected virtual void OnFall()
+    {
+        stateMachine.RequestStateChange("FallingState");
+    }
 
-            stateMachine.Player.Input.PlayerActions.Dash.started += OnDashStarted;
+    protected override void OnMovementPerformed(InputAction.CallbackContext context)
+    {
+        base.OnMovementPerformed(context);
 
-            stateMachine.Player.Input.PlayerActions.Jump.started += OnJumpStarted;
-        }
-
-        protected override void RemoveInputActionsCallbacks()
-        {
-            base.RemoveInputActionsCallbacks();
-
-            stateMachine.Player.Input.PlayerActions.Dash.started -= OnDashStarted;
-
-            stateMachine.Player.Input.PlayerActions.Jump.started -= OnJumpStarted;
-        }
-
-        protected virtual void OnDashStarted(InputAction.CallbackContext context)
-        {
-            stateMachine.RequestStateChange("DashingState");
-        }
-
-        protected virtual void OnJumpStarted(InputAction.CallbackContext context)
-        {
-            stateMachine.RequestStateChange("JumpingState");
-        }
-
-        protected virtual void OnMove()
-        {
-            if (stateMachine.ReusableData.ShouldSprint)
-            {
-                stateMachine.RequestStateChange("SprintingState");
-
-                return;
-            }
-
-            if (stateMachine.ReusableData.ShouldWalk)
-            {
-                stateMachine.RequestStateChange("WalkingState");
-
-                return;
-            }
-
-            stateMachine.RequestStateChange("RunningState");
-        }
-
-        protected override void OnContactWithGroundExited(Collider collider)
-        {
-            if (IsThereGroundUnderneath())
-            {
-                return;
-            }
-
-            Vector3 capsuleColliderCenterInWorldSpace = stateMachine.Player.ResizableCapsuleCollider.CapsuleColliderData.Collider.bounds.center;
-
-            Ray downwardsRayFromCapsuleBottom = new Ray(capsuleColliderCenterInWorldSpace - stateMachine.Player.ResizableCapsuleCollider.CapsuleColliderData.ColliderVerticalExtents, Vector3.down);
-
-            if (!Physics.Raycast(downwardsRayFromCapsuleBottom, out _, groundedData.GroundToFallRayDistance, stateMachine.Player.LayerData.GroundLayer, QueryTriggerInteraction.Ignore))
-            {
-                OnFall();
-            }
-        }
-
-        private bool IsThereGroundUnderneath()
-        {
-            PlayerTriggerColliderData triggerColliderData = stateMachine.Player.ResizableCapsuleCollider.TriggerColliderData;
-
-            Vector3 groundColliderCenterInWorldSpace = triggerColliderData.GroundCheckCollider.bounds.center;
-
-            Collider[] overlappedGroundColliders = Physics.OverlapBox(groundColliderCenterInWorldSpace, triggerColliderData.GroundCheckColliderVerticalExtents, triggerColliderData.GroundCheckCollider.transform.rotation, stateMachine.Player.LayerData.GroundLayer, QueryTriggerInteraction.Ignore);
-
-            return overlappedGroundColliders.Length > 0;
-        }
-
-        protected virtual void OnFall()
-        {
-            stateMachine.RequestStateChange("FallingState");
-        }
-
-        protected override void OnMovementPerformed(InputAction.CallbackContext context)
-        {
-            base.OnMovementPerformed(context);
-
-            UpdateTargetRotation(GetMovementInputDirection());
-        }
+        UpdateTargetRotation(GetMovementInputDirection());
     }
 }

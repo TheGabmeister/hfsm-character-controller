@@ -1,122 +1,119 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace GenshinImpactMovementSystem
+public class PlayerSprintingState : PlayerMovingState
 {
-    public class PlayerSprintingState : PlayerMovingState
+    private float startTime;
+
+    private bool keepSprinting;
+    private bool shouldResetSprintState;
+
+    public PlayerSprintingState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
     {
-        private float startTime;
+    }
 
-        private bool keepSprinting;
-        private bool shouldResetSprintState;
+    public override void OnEnter()
+    {
+        stateMachine.ReusableData.MovementSpeedModifier = groundedData.SprintData.SpeedModifier;
 
-        public PlayerSprintingState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
+        base.OnEnter();
+
+        StartAnimation(stateMachine.Player.AnimationData.SprintParameterHash);
+
+        stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.StrongForce;
+
+        startTime = Time.time;
+
+        shouldResetSprintState = true;
+
+        if (!stateMachine.ReusableData.ShouldSprint)
         {
+            keepSprinting = false;
+        }
+    }
+
+    public override void OnExit()
+    {
+        base.OnExit();
+
+        StopAnimation(stateMachine.Player.AnimationData.SprintParameterHash);
+
+        if (shouldResetSprintState)
+        {
+            keepSprinting = false;
+
+            stateMachine.ReusableData.ShouldSprint = false;
+        }
+    }
+
+    public override void OnLogic()
+    {
+        base.OnLogic();
+
+        if (keepSprinting)
+        {
+            return;
         }
 
-        public override void OnEnter()
+        if (Time.time < startTime + groundedData.SprintData.SprintToRunTime)
         {
-            stateMachine.ReusableData.MovementSpeedModifier = groundedData.SprintData.SpeedModifier;
-
-            base.OnEnter();
-
-            StartAnimation(stateMachine.Player.AnimationData.SprintParameterHash);
-
-            stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.StrongForce;
-
-            startTime = Time.time;
-
-            shouldResetSprintState = true;
-
-            if (!stateMachine.ReusableData.ShouldSprint)
-            {
-                keepSprinting = false;
-            }
+            return;
         }
 
-        public override void OnExit()
+        StopSprinting();
+    }
+
+    private void StopSprinting()
+    {
+        if (stateMachine.ReusableData.MovementInput == Vector2.zero)
         {
-            base.OnExit();
+            stateMachine.RequestStateChange("IdlingState");
 
-            StopAnimation(stateMachine.Player.AnimationData.SprintParameterHash);
-
-            if (shouldResetSprintState)
-            {
-                keepSprinting = false;
-
-                stateMachine.ReusableData.ShouldSprint = false;
-            }
+            return;
         }
 
-        public override void OnLogic()
-        {
-            base.OnLogic();
+        stateMachine.RequestStateChange("RunningState");
+    }
 
-            if (keepSprinting)
-            {
-                return;
-            }
+    protected override void AddInputActionsCallbacks()
+    {
+        base.AddInputActionsCallbacks();
 
-            if (Time.time < startTime + groundedData.SprintData.SprintToRunTime)
-            {
-                return;
-            }
+        stateMachine.Player.Input.PlayerActions.Sprint.performed += OnSprintPerformed;
+    }
 
-            StopSprinting();
-        }
+    protected override void RemoveInputActionsCallbacks()
+    {
+        base.RemoveInputActionsCallbacks();
 
-        private void StopSprinting()
-        {
-            if (stateMachine.ReusableData.MovementInput == Vector2.zero)
-            {
-                stateMachine.RequestStateChange("IdlingState");
+        stateMachine.Player.Input.PlayerActions.Sprint.performed -= OnSprintPerformed;
+    }
 
-                return;
-            }
+    private void OnSprintPerformed(InputAction.CallbackContext context)
+    {
+        keepSprinting = true;
 
-            stateMachine.RequestStateChange("RunningState");
-        }
+        stateMachine.ReusableData.ShouldSprint = true;
+    }
 
-        protected override void AddInputActionsCallbacks()
-        {
-            base.AddInputActionsCallbacks();
+    protected override void OnMovementCanceled(InputAction.CallbackContext context)
+    {
+        stateMachine.RequestStateChange("HardStoppingState");
 
-            stateMachine.Player.Input.PlayerActions.Sprint.performed += OnSprintPerformed;
-        }
+        base.OnMovementCanceled(context);
+    }
 
-        protected override void RemoveInputActionsCallbacks()
-        {
-            base.RemoveInputActionsCallbacks();
+    protected override void OnJumpStarted(InputAction.CallbackContext context)
+    {
+        shouldResetSprintState = false;
 
-            stateMachine.Player.Input.PlayerActions.Sprint.performed -= OnSprintPerformed;
-        }
+        base.OnJumpStarted(context);
+    }
 
-        private void OnSprintPerformed(InputAction.CallbackContext context)
-        {
-            keepSprinting = true;
+    protected override void OnFall()
+    {
+        shouldResetSprintState = false;
 
-            stateMachine.ReusableData.ShouldSprint = true;
-        }
-
-        protected override void OnMovementCanceled(InputAction.CallbackContext context)
-        {
-            stateMachine.RequestStateChange("HardStoppingState");
-
-            base.OnMovementCanceled(context);
-        }
-
-        protected override void OnJumpStarted(InputAction.CallbackContext context)
-        {
-            shouldResetSprintState = false;
-
-            base.OnJumpStarted(context);
-        }
-
-        protected override void OnFall()
-        {
-            shouldResetSprintState = false;
-
-            base.OnFall();
-        }
+        base.OnFall();
     }
 }

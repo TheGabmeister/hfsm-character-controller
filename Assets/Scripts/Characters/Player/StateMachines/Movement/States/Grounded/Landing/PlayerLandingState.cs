@@ -1,25 +1,23 @@
-namespace GenshinImpactMovementSystem
+
+public class PlayerLandingState : PlayerGroundedState
 {
-    public class PlayerLandingState : PlayerGroundedState
+    public PlayerLandingState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
     {
-        public PlayerLandingState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
-        {
-        }
+    }
 
-        public override void OnEnter()
-        {
-            base.OnEnter();
+    public override void OnEnter()
+    {
+        base.OnEnter();
 
-            StartAnimation(stateMachine.Player.AnimationData.LandingParameterHash);
+        StartAnimation(stateMachine.Player.AnimationData.LandingParameterHash);
 
-            DisableCameraRecentering();
-        }
+        DisableCameraRecentering();
+    }
 
-        public override void OnExit()
-        {
-            base.OnExit();
+    public override void OnExit()
+    {
+        base.OnExit();
 
-            StopAnimation(stateMachine.Player.AnimationData.LandingParameterHash);
-        }
+        StopAnimation(stateMachine.Player.AnimationData.LandingParameterHash);
     }
 }
