@@ -29,8 +29,6 @@ namespace GenshinImpactMovementSystem
 
         private PlayerMovementStateMachine movementStateMachine;
 
-        private UnityHFSM.StateMachine fsm;
-
         private void Awake()
         {
             CameraRecenteringUtility.Initialize();
@@ -44,49 +42,50 @@ namespace GenshinImpactMovementSystem
 
             MainCameraTransform = Camera.main.transform;
 
-            movementStateMachine = new PlayerMovementStateMachine(this);
+            
         }
 
         private void Start()
         {
-            movementStateMachine.ChangeState(movementStateMachine.IdlingState);
+            movementStateMachine = new PlayerMovementStateMachine(this);
+            movementStateMachine.Init();
         }
 
         private void Update()
         {
-            movementStateMachine.HandleInput();
+            movementStateMachine.OnAction("OnHandleInput");
 
-            movementStateMachine.Update();
+            movementStateMachine.OnLogic();
         }
 
         private void FixedUpdate()
         {
-            movementStateMachine.PhysicsUpdate();
+            movementStateMachine.OnAction("OnPhysicsLogic");
         }
 
         private void OnTriggerEnter(Collider collider)
         {
-            movementStateMachine.OnTriggerEnter(collider);
+            //movementStateMachine.OnTriggerEnter(collider);
         }
 
         private void OnTriggerExit(Collider collider)
         {
-            movementStateMachine.OnTriggerExit(collider);
+            //movementStateMachine.OnTriggerExit(collider);
         }
 
         public void OnMovementStateAnimationEnterEvent()
         {
-            movementStateMachine.OnAnimationEnterEvent();
+            //movementStateMachine.OnAnimationEnterEvent();
         }
 
         public void OnMovementStateAnimationExitEvent()
         {
-            movementStateMachine.OnAnimationExitEvent();
+            //movementStateMachine.OnAnimationExitEvent();
         }
 
         public void OnMovementStateAnimationTransitionEvent()
         {
-            movementStateMachine.OnAnimationTransitionEvent();
+            //movementStateMachine.OnAnimationTransitionEvent();
         }
     }
 }

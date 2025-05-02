@@ -9,9 +9,9 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
-            base.Enter();
+            base.OnEnter();
 
             StartAnimation(stateMachine.Player.AnimationData.GroundedParameterHash);
 
@@ -20,16 +20,16 @@ namespace GenshinImpactMovementSystem
             UpdateCameraRecenteringState(stateMachine.ReusableData.MovementInput);
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             StopAnimation(stateMachine.Player.AnimationData.GroundedParameterHash);
         }
 
-        public override void PhysicsUpdate()
+        public override void OnPhysicsLogic()
         {
-            base.PhysicsUpdate();
+            base.OnPhysicsLogic();
 
             Float();
         }
@@ -115,31 +115,31 @@ namespace GenshinImpactMovementSystem
 
         protected virtual void OnDashStarted(InputAction.CallbackContext context)
         {
-            stateMachine.ChangeState(stateMachine.DashingState);
+            stateMachine.RequestStateChange("DashingState");
         }
 
         protected virtual void OnJumpStarted(InputAction.CallbackContext context)
         {
-            stateMachine.ChangeState(stateMachine.JumpingState);
+            stateMachine.RequestStateChange("JumpingState");
         }
 
         protected virtual void OnMove()
         {
             if (stateMachine.ReusableData.ShouldSprint)
             {
-                stateMachine.ChangeState(stateMachine.SprintingState);
+                stateMachine.RequestStateChange("SprintingState");
 
                 return;
             }
 
             if (stateMachine.ReusableData.ShouldWalk)
             {
-                stateMachine.ChangeState(stateMachine.WalkingState);
+                stateMachine.RequestStateChange("WalkingState");
 
                 return;
             }
 
-            stateMachine.ChangeState(stateMachine.RunningState);
+            stateMachine.RequestStateChange("RunningState");
         }
 
         protected override void OnContactWithGroundExited(Collider collider)
@@ -172,7 +172,7 @@ namespace GenshinImpactMovementSystem
 
         protected virtual void OnFall()
         {
-            stateMachine.ChangeState(stateMachine.FallingState);
+            stateMachine.RequestStateChange("FallingState");
         }
 
         protected override void OnMovementPerformed(InputAction.CallbackContext context)

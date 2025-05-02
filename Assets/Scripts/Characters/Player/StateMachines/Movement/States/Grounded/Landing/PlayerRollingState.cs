@@ -9,27 +9,27 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
             stateMachine.ReusableData.MovementSpeedModifier = groundedData.RollData.SpeedModifier;
 
-            base.Enter();
+            base.OnEnter();
 
             StartAnimation(stateMachine.Player.AnimationData.RollParameterHash);
 
             stateMachine.ReusableData.ShouldSprint = false;
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             StopAnimation(stateMachine.Player.AnimationData.RollParameterHash);
         }
 
-        public override void PhysicsUpdate()
+        public override void OnPhysicsLogic()
         {
-            base.PhysicsUpdate();
+            base.OnPhysicsLogic();
 
             if (stateMachine.ReusableData.MovementInput != Vector2.zero)
             {
@@ -43,7 +43,7 @@ namespace GenshinImpactMovementSystem
         {
             if (stateMachine.ReusableData.MovementInput == Vector2.zero)
             {
-                stateMachine.ChangeState(stateMachine.MediumStoppingState);
+                stateMachine.RequestStateChange("MediumStoppingState");
 
                 return;
             }

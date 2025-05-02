@@ -8,20 +8,20 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
             stateMachine.ReusableData.MovementSpeedModifier = 0;
 
-            base.Enter();
+            base.OnEnter();
 
             stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.StationaryForce;
 
             ResetVelocity();
         }
 
-        public override void Update()
+        public override void OnLogic()
         {
-            base.Update();
+            base.OnLogic();
 
             if (stateMachine.ReusableData.MovementInput == Vector2.zero)
             {
@@ -31,9 +31,9 @@ namespace GenshinImpactMovementSystem
             OnMove();
         }
 
-        public override void PhysicsUpdate()
+        public override void OnPhysicsLogic()
         {
-            base.PhysicsUpdate();
+            base.OnPhysicsLogic();
 
             if (!IsMovingHorizontally())
             {
@@ -45,7 +45,7 @@ namespace GenshinImpactMovementSystem
 
         public override void OnAnimationTransitionEvent()
         {
-            stateMachine.ChangeState(stateMachine.IdlingState);
+            stateMachine.RequestStateChange("IdlingState");
         }
     }
 }

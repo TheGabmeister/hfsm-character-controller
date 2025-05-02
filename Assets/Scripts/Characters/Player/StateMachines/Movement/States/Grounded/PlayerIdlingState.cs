@@ -8,13 +8,13 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
             stateMachine.ReusableData.MovementSpeedModifier = 0f;
 
             stateMachine.ReusableData.BackwardsCameraRecenteringData = groundedData.IdleData.BackwardsCameraRecenteringData;
 
-            base.Enter();
+            base.OnEnter();
 
             StartAnimation(stateMachine.Player.AnimationData.IdleParameterHash);
 
@@ -23,16 +23,16 @@ namespace GenshinImpactMovementSystem
             ResetVelocity();
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             StopAnimation(stateMachine.Player.AnimationData.IdleParameterHash);
         }
 
-        public override void Update()
+        public override void OnLogic()
         {
-            base.Update();
+            base.OnLogic();
 
             if (stateMachine.ReusableData.MovementInput == Vector2.zero)
             {
@@ -42,9 +42,9 @@ namespace GenshinImpactMovementSystem
             OnMove();
         }
 
-        public override void PhysicsUpdate()
+        public override void OnPhysicsLogic()
         {
-            base.PhysicsUpdate();
+            base.OnPhysicsLogic();
 
             if (!IsMovingHorizontally())
             {

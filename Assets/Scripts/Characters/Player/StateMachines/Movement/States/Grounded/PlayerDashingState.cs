@@ -15,11 +15,11 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
             stateMachine.ReusableData.MovementSpeedModifier = groundedData.DashData.SpeedModifier;
 
-            base.Enter();
+            base.OnEnter();
 
             StartAnimation(stateMachine.Player.AnimationData.DashParameterHash);
 
@@ -36,18 +36,18 @@ namespace GenshinImpactMovementSystem
             startTime = Time.time;
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             StopAnimation(stateMachine.Player.AnimationData.DashParameterHash);
 
             SetBaseRotationData();
         }
 
-        public override void PhysicsUpdate()
+        public override void OnPhysicsLogic()
         {
-            base.PhysicsUpdate();
+            base.OnPhysicsLogic();
 
             if (!shouldKeepRotating)
             {
@@ -61,12 +61,12 @@ namespace GenshinImpactMovementSystem
         {
             if (stateMachine.ReusableData.MovementInput == Vector2.zero)
             {
-                stateMachine.ChangeState(stateMachine.HardStoppingState);
+                stateMachine.RequestStateChange("HardStoppingState");
 
                 return;
             }
 
-            stateMachine.ChangeState(stateMachine.SprintingState);
+            stateMachine.RequestStateChange("SprintingState");
         }
 
         protected override void AddInputActionsCallbacks()

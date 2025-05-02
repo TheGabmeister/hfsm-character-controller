@@ -4,14 +4,15 @@ using UnityEngine.InputSystem;
 
 namespace GenshinImpactMovementSystem
 {
-    public class PlayerMovementState : IState
+    public class PlayerMovementState : PlayerActionState
     {
         protected PlayerMovementStateMachine stateMachine;
 
         protected readonly PlayerGroundedData groundedData;
         protected readonly PlayerAirborneData airborneData;
 
-        public PlayerMovementState(PlayerMovementStateMachine playerMovementStateMachine)
+        public PlayerMovementState(PlayerMovementStateMachine playerMovementStateMachine) 
+            : base(needsExitTime: false, isGhostState: false)
         {
             stateMachine = playerMovementStateMachine;
 
@@ -21,26 +22,26 @@ namespace GenshinImpactMovementSystem
             InitializeData();
         }
 
-        public virtual void Enter()
+        public override void OnEnter()
         {
             AddInputActionsCallbacks();
         }
 
-        public virtual void Exit()
+        public override void OnExit()
         {
             RemoveInputActionsCallbacks();
         }
 
-        public virtual void HandleInput()
+        public override void OnHandleInput()
         {
             ReadMovementInput();
         }
 
-        public virtual void Update()
+        public override void OnLogic()
         {
         }
 
-        public virtual void PhysicsUpdate()
+        public override void OnPhysicsLogic()
         {
             Move();
         }

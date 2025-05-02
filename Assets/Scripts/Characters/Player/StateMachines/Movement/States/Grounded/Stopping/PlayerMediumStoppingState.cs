@@ -6,9 +6,9 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
-            base.Enter();
+            base.OnEnter();
 
             StartAnimation(stateMachine.Player.AnimationData.MediumStopParameterHash);
 
@@ -17,9 +17,9 @@ namespace GenshinImpactMovementSystem
             stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.MediumForce;
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             StopAnimation(stateMachine.Player.AnimationData.MediumStopParameterHash);
         }

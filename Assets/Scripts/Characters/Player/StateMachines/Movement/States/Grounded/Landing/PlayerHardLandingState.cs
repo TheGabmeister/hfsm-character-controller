@@ -8,11 +8,11 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
             stateMachine.ReusableData.MovementSpeedModifier = 0f;
 
-            base.Enter();
+            base.OnEnter();
 
             StartAnimation(stateMachine.Player.AnimationData.HardLandParameterHash);
 
@@ -21,18 +21,18 @@ namespace GenshinImpactMovementSystem
             ResetVelocity();
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             StopAnimation(stateMachine.Player.AnimationData.HardLandParameterHash);
 
             stateMachine.Player.Input.PlayerActions.Movement.Enable();
         }
 
-        public override void PhysicsUpdate()
+        public override void OnPhysicsLogic()
         {
-            base.PhysicsUpdate();
+            base.OnPhysicsLogic();
 
             if (!IsMovingHorizontally())
             {
@@ -49,7 +49,7 @@ namespace GenshinImpactMovementSystem
 
         public override void OnAnimationTransitionEvent()
         {
-            stateMachine.ChangeState(stateMachine.IdlingState);
+            stateMachine.RequestStateChange("IdlingState");
         }
 
         protected override void AddInputActionsCallbacks()
@@ -78,7 +78,7 @@ namespace GenshinImpactMovementSystem
                 return;
             }
 
-            stateMachine.ChangeState(stateMachine.RunningState);
+            stateMachine.RequestStateChange("RunningState");
         }
 
         protected override void OnJumpStarted(InputAction.CallbackContext context)

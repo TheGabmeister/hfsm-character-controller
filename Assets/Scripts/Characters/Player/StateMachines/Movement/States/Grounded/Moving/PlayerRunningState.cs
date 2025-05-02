@@ -11,11 +11,11 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
             stateMachine.ReusableData.MovementSpeedModifier = groundedData.RunData.SpeedModifier;
 
-            base.Enter();
+            base.OnEnter();
 
             StartAnimation(stateMachine.Player.AnimationData.RunParameterHash);
 
@@ -24,16 +24,16 @@ namespace GenshinImpactMovementSystem
             startTime = Time.time;
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             StopAnimation(stateMachine.Player.AnimationData.RunParameterHash);
         }
 
-        public override void Update()
+        public override void OnLogic()
         {
-            base.Update();
+            base.OnLogic();
 
             if (!stateMachine.ReusableData.ShouldWalk)
             {
@@ -52,24 +52,24 @@ namespace GenshinImpactMovementSystem
         {
             if (stateMachine.ReusableData.MovementInput == Vector2.zero)
             {
-                stateMachine.ChangeState(stateMachine.IdlingState);
+                stateMachine.RequestStateChange("IdlingState");
 
                 return;
             }
 
-            stateMachine.ChangeState(stateMachine.WalkingState);
+            stateMachine.RequestStateChange("WalkingState");
         }
 
         protected override void OnWalkToggleStarted(InputAction.CallbackContext context)
         {
             base.OnWalkToggleStarted(context);
 
-            stateMachine.ChangeState(stateMachine.WalkingState);
+            stateMachine.RequestStateChange("WalkingState");
         }
 
         protected override void OnMovementCanceled(InputAction.CallbackContext context)
         {
-            stateMachine.ChangeState(stateMachine.MediumStoppingState);
+            stateMachine.RequestStateChange("MediumStoppingState");
 
             base.OnMovementCanceled(context);
         }

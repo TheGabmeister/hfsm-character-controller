@@ -6,9 +6,9 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
-            base.Enter();
+            base.OnEnter();
 
             StartAnimation(stateMachine.Player.AnimationData.HardStopParameterHash);
 
@@ -17,9 +17,9 @@ namespace GenshinImpactMovementSystem
             stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.StrongForce;
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             StopAnimation(stateMachine.Player.AnimationData.HardStopParameterHash);
         }
@@ -31,7 +31,7 @@ namespace GenshinImpactMovementSystem
                 return;
             }
 
-            stateMachine.ChangeState(stateMachine.RunningState);
+            stateMachine.RequestStateChange("RunningState");
         }
     }
 }

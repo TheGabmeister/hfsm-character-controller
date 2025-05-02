@@ -8,22 +8,22 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
             stateMachine.ReusableData.MovementSpeedModifier = groundedData.WalkData.SpeedModifier;
 
             stateMachine.ReusableData.BackwardsCameraRecenteringData = groundedData.WalkData.BackwardsCameraRecenteringData;
 
-            base.Enter();
+            base.OnEnter();
 
             StartAnimation(stateMachine.Player.AnimationData.WalkParameterHash);
 
             stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.WeakForce;
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             StopAnimation(stateMachine.Player.AnimationData.WalkParameterHash);
 
@@ -34,12 +34,12 @@ namespace GenshinImpactMovementSystem
         {
             base.OnWalkToggleStarted(context);
 
-            stateMachine.ChangeState(stateMachine.RunningState);
+            stateMachine.RequestStateChange("RunningState");
         }
 
         protected override void OnMovementCanceled(InputAction.CallbackContext context)
         {
-            stateMachine.ChangeState(stateMachine.LightStoppingState);
+            stateMachine.RequestStateChange("LightStoppingState");
 
             base.OnMovementCanceled(context);
         }

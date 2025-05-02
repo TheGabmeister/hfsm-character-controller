@@ -6,9 +6,9 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
-            base.Enter();
+            base.OnEnter();
 
             stateMachine.ReusableData.MovementDecelerationForce = groundedData.StopData.LightDecelerationForce;
 

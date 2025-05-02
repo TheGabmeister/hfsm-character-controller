@@ -12,9 +12,9 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
-            base.Enter();
+            base.OnEnter();
 
             stateMachine.ReusableData.MovementSpeedModifier = 0f;
 
@@ -27,18 +27,18 @@ namespace GenshinImpactMovementSystem
             Jump();
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             SetBaseRotationData();
 
             canStartFalling = false;
         }
 
-        public override void Update()
+        public override void OnLogic()
         {
-            base.Update();
+            base.OnLogic();
 
             if (!canStartFalling && IsMovingUp(0f))
             {
@@ -50,12 +50,12 @@ namespace GenshinImpactMovementSystem
                 return;
             }
 
-            stateMachine.ChangeState(stateMachine.FallingState);
+            stateMachine.RequestStateChange("FallingState");
         }
 
-        public override void PhysicsUpdate()
+        public override void OnPhysicsLogic()
         {
-            base.PhysicsUpdate();
+            base.OnPhysicsLogic();
 
             if (shouldKeepRotating)
             {

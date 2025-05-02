@@ -8,18 +8,18 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
-            base.Enter();
+            base.OnEnter();
 
             StartAnimation(stateMachine.Player.AnimationData.AirborneParameterHash);
 
             ResetSprintState();
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             StopAnimation(stateMachine.Player.AnimationData.AirborneParameterHash);
         }
@@ -31,7 +31,7 @@ namespace GenshinImpactMovementSystem
 
         protected override void OnContactWithGround(Collider collider)
         {
-            stateMachine.ChangeState(stateMachine.LightLandingState);
+            stateMachine.RequestStateChange("LightLandingState");
         }
     }
 }

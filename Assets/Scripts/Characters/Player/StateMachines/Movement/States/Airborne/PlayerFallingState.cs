@@ -10,9 +10,9 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
-            base.Enter();
+            base.OnEnter();
 
             StartAnimation(stateMachine.Player.AnimationData.FallParameterHash);
 
@@ -23,16 +23,16 @@ namespace GenshinImpactMovementSystem
             ResetVerticalVelocity();
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             StopAnimation(stateMachine.Player.AnimationData.FallParameterHash);
         }
 
-        public override void PhysicsUpdate()
+        public override void OnPhysicsLogic()
         {
-            base.PhysicsUpdate();
+            base.OnPhysicsLogic();
 
             LimitVerticalVelocity();
         }
@@ -61,19 +61,19 @@ namespace GenshinImpactMovementSystem
 
             if (fallDistance < airborneData.FallData.MinimumDistanceToBeConsideredHardFall)
             {
-                stateMachine.ChangeState(stateMachine.LightLandingState);
+                stateMachine.RequestStateChange("LightLandingState");
 
                 return;
             }
 
             if (stateMachine.ReusableData.ShouldWalk && !stateMachine.ReusableData.ShouldSprint || stateMachine.ReusableData.MovementInput == Vector2.zero)
             {
-                stateMachine.ChangeState(stateMachine.HardLandingState);
+                stateMachine.RequestStateChange("HardLandingState");
 
                 return;
             }
 
-            stateMachine.ChangeState(stateMachine.RollingState);
+            stateMachine.RequestStateChange("RollingState");
 
         }
     }

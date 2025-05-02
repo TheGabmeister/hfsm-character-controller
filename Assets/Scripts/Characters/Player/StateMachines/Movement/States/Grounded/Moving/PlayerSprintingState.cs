@@ -14,11 +14,11 @@ namespace GenshinImpactMovementSystem
         {
         }
 
-        public override void Enter()
+        public override void OnEnter()
         {
             stateMachine.ReusableData.MovementSpeedModifier = groundedData.SprintData.SpeedModifier;
 
-            base.Enter();
+            base.OnEnter();
 
             StartAnimation(stateMachine.Player.AnimationData.SprintParameterHash);
 
@@ -34,9 +34,9 @@ namespace GenshinImpactMovementSystem
             }
         }
 
-        public override void Exit()
+        public override void OnExit()
         {
-            base.Exit();
+            base.OnExit();
 
             StopAnimation(stateMachine.Player.AnimationData.SprintParameterHash);
 
@@ -48,9 +48,9 @@ namespace GenshinImpactMovementSystem
             }
         }
 
-        public override void Update()
+        public override void OnLogic()
         {
-            base.Update();
+            base.OnLogic();
 
             if (keepSprinting)
             {
@@ -69,12 +69,12 @@ namespace GenshinImpactMovementSystem
         {
             if (stateMachine.ReusableData.MovementInput == Vector2.zero)
             {
-                stateMachine.ChangeState(stateMachine.IdlingState);
+                stateMachine.RequestStateChange("IdlingState");
 
                 return;
             }
 
-            stateMachine.ChangeState(stateMachine.RunningState);
+            stateMachine.RequestStateChange("RunningState");
         }
 
         protected override void AddInputActionsCallbacks()
@@ -100,7 +100,7 @@ namespace GenshinImpactMovementSystem
 
         protected override void OnMovementCanceled(InputAction.CallbackContext context)
         {
-            stateMachine.ChangeState(stateMachine.HardStoppingState);
+            stateMachine.RequestStateChange("HardStoppingState");
 
             base.OnMovementCanceled(context);
         }
